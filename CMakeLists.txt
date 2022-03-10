@@ -50,18 +50,33 @@ target_link_libraries(simulator
         )
 
 add_custom_command(TARGET simulator POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different"${CMAKE_SOURCE_DIR}/resources/simulator.pck" $<TARGET_FILE_DIR:simulator>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/resources/simulator.pck" $<TARGET_FILE_DIR:simulator>
     )
 
 if (WIN32)
     set(OpenCV_DIR_DLL "${OpenCV_DIR}/bin/$<CONFIGURATION>")
 
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+        add_custom_command(TARGET simulator POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_highgui430d.dll" $<TARGET_FILE_DIR:simulator>
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_imgproc430d.dll" $<TARGET_FILE_DIR:simulator>
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_core430d.dll" $<TARGET_FILE_DIR:simulator>
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_imgcodecs430d.dll" $<TARGET_FILE_DIR:simulator>
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_videoio430d.dll" $<TARGET_FILE_DIR:simulator>
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${ZeroMQ_DIR}/bin/Debug/libzmq-v142-mt-gd-4_3_4.dll" $<TARGET_FILE_DIR:simulator>
+            )
+    else()
+        add_custom_command(TARGET simulator POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_highgui430.dll" $<TARGET_FILE_DIR:simulator>
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_imgproc430.dll" $<TARGET_FILE_DIR:simulator>
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_core430.dll" $<TARGET_FILE_DIR:simulator>
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_imgcodecs430.dll" $<TARGET_FILE_DIR:simulator>
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_videoio430.dll" $<TARGET_FILE_DIR:simulator>
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${ZeroMQ_DIR}/bin/Release/libzmq-v142-mt-4_3_4.dll" $<TARGET_FILE_DIR:simulator>
+            )
+    endif()
+
     add_custom_command(TARGET simulator POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_highgui430.dll" $<TARGET_FILE_DIR:simulator>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_imgproc430.dll" $<TARGET_FILE_DIR:simulator>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_core430.dll" $<TARGET_FILE_DIR:simulator>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_imgcodecs430.dll" $<TARGET_FILE_DIR:simulator>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/opencv_videoio430.dll" $<TARGET_FILE_DIR:simulator>
         #COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OpenCV_DIR_DLL}/zlib1.dll" $<TARGET_FILE_DIR:simulator>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${GSTREAMER_DIR_DLL}/intl-8.dll" $<TARGET_FILE_DIR:simulator>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${GSTREAMER_DIR_DLL}/ffi-7.dll" $<TARGET_FILE_DIR:simulator>
@@ -78,7 +93,6 @@ if (WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${GSTREAMER_DIR_DLL}/glib-2.0-0.dll" $<TARGET_FILE_DIR:simulator>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${GSTREAMER_DIR_DLL}/gobject-2.0-0.dll" $<TARGET_FILE_DIR:simulator>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${GSTREAMER_DIR_DLL}/gmodule-2.0-0.dll" $<TARGET_FILE_DIR:simulator>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${ZeroMQ_DIR}/bin/Release/libzmq-v142-mt-4_3_4.dll" $<TARGET_FILE_DIR:simulator>
         )
 
     windeployqt(simulator)
