@@ -98,7 +98,7 @@ namespace QUrho {
         void *m_userApiPair;
 
         mutable std::mutex m_controlMutex;
-        std::atomic_bool m_update = true;
+        std::atomic_bool m_update = {true};
         std::thread m_controlUpdateThread;
     };
 

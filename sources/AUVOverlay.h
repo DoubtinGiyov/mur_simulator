@@ -12,6 +12,7 @@
 #include <Urho3D/Scene/Scene.h>
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Graphics/Texture2D.h>
+#include <Urho3D/UI/Text.h>
 
 #include <QObject>
 #include <QSharedPointer>

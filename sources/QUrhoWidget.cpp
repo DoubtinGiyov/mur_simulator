@@ -30,6 +30,8 @@ namespace QUrho {
 
         auto parametersToSet = parameters;
         parametersToSet[Urho3D::EP_FULL_SCREEN] = false;
+        parametersToSet[Urho3D::EP_WINDOW_WIDTH] = 400;
+        parametersToSet[Urho3D::EP_WINDOW_HEIGHT] = 400;
         parametersToSet[Urho3D::EP_EXTERNAL_WINDOW] = reinterpret_cast<void *>(winId());
 
         return m_engine->Initialize(parametersToSet);

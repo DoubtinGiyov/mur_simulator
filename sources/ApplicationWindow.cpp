@@ -4,8 +4,10 @@
 #include "QUrhoScene.h"
 #include "QAUVSettingsWidget.h"
 #include "AUVOverlay.h"
+#include "UIOverlay.h"
 #include "SharingOverlay.h"
 #include "PingersOverlay.h"
+#include "QUrhoHelpers.h"
 
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/Engine/EngineDefs.h>
@@ -42,15 +44,20 @@ namespace QUrho {
             m_rollLabel{new QLabel{"Roll: 0.0 "}},
             m_depthLabel{new QLabel{"Depth: 0.0 "}} {
         InitializeMainWindow();
+#ifdef Q_OS_MACOS
+        resize(200, 200);
+        setAttribute(Qt::WA_UpdatesDisabled);
+#else
         resize(1024, 768);
+#endif
         connect(m_settingsWidget.data(), &QAUVSettingsWidget::accepted, this, &ApplicationWindow::OnSettingAccepted);
+                
     }
 
     void ApplicationWindow::InitializeEngine() {
         Urho3D::VariantMap parameters;
         parameters[Urho3D::EP_RESOURCE_PREFIX_PATHS] = "";
         parameters[Urho3D::EP_RESOURCE_PATHS] = "";
-        parameters[Urho3D::EP_RESOURCE_PACKAGES] = "";
         parameters[Urho3D::EP_AUTOLOAD_PATHS] = "";
         parameters[Urho3D::EP_MULTI_SAMPLE] = 16;
         parameters[Urho3D::EP_WINDOW_RESIZABLE] = true;
@@ -79,6 +86,17 @@ namespace QUrho {
         action = AddAction("AUV Settings", Qt::CTRL + Qt::Key_S);
         menu->addAction(action);
         connect(action, &QAction::triggered, this, &ApplicationWindow::OnOpenAUVSettings);
+        
+#ifdef Q_OS_MACOS
+        action = AddAction("Remote mode", Qt::CTRL + Qt::Key_M);
+        action->setCheckable(true);
+        menu->addAction(action);
+        connect(action, &QAction::triggered, this, &ApplicationWindow::OnModeChanged);
+
+        action = AddAction("Robot reset", Qt::CTRL + Qt::Key_R);
+        connect(action, &QAction::triggered, this, &ApplicationWindow::OnAUVReset);
+        menu->addAction(action);
+#endif
     }
 
     void ApplicationWindow::CreateToolBar() {
@@ -124,7 +142,9 @@ namespace QUrho {
         setContentsMargins(0, 0, 0, 0);
         setMinimumSize(QSize{640, 480});
         CreateMenus();
+#ifndef Q_OS_MACOS
         CreateToolBar();
+#endif
     }
 
     void ApplicationWindow::OnSceneOpen() {
@@ -175,8 +195,9 @@ namespace QUrho {
     }
 
     void ApplicationWindow::OnTelemetryUpdated() {
-        auto rotations = m_scene->GetAUVOverlay()->GetAUVRotations();
-        auto depth = m_scene->GetAUVOverlay()->GetAUVDepth();
+        auto AUVoverlay = m_scene->GetAUVOverlay();
+        auto rotations = AUVoverlay->GetAUVRotations();
+        auto depth = AUVoverlay->GetAUVDepth();
 
         auto y = QString("Yaw: ") + QString::number(rotations.y_, 'f', 2) + " ";
         auto p = QString("Pitch: ") + QString::number(rotations.x_, 'f', 2) + " ";
@@ -187,6 +208,13 @@ namespace QUrho {
         m_pitchLabel->setText(p);
         m_rollLabel->setText(r);
         m_depthLabel->setText(d);
+        
+#ifdef Q_OS_MACOS
+        m_scene->GetUIOverlay()->yawText->SetText(QtUrhoStringCast(y));
+        m_scene->GetUIOverlay()->pitchText->SetText(QtUrhoStringCast(p));
+        m_scene->GetUIOverlay()->rollText->SetText(QtUrhoStringCast(r));
+        m_scene->GetUIOverlay()->depthText->SetText(QtUrhoStringCast(d));
+#endif
     }
 
     void ApplicationWindow::OnSettingAccepted() {

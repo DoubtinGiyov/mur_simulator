@@ -6,6 +6,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+    set(CMAKE_MACOSX_BUNDLE ON)
+endif ()
+
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
+
+set(GSTREAMER_DIR_DLL "" CACHE PATH "Path to gstreamer libs")
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
 set(GSTREAMER_DIR_DLL "" CACHE PATH "Path to gstreamer libs")
@@ -38,16 +46,26 @@ file(GLOB_RECURSE SOURCE_FILES
 set(TARGET_NAME simulator)
 
 setup_main_executable()
-
-target_link_libraries(simulator
-        ${OpenCV_LIBS}
-        Qt5::Core
-        Qt5::Widgets
-        Qt5::Gui
-        Qt5::Xml
-        libzmq
-        opengl32
-        )
+if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+    target_link_libraries(simulator
+            ${OpenCV_LIBS}
+            Qt5::Core
+            Qt5::Widgets
+            Qt5::Gui
+            Qt5::Xml
+            libzmq
+            )
+else ()
+    target_link_libraries(simulator
+            ${OpenCV_LIBS}
+            Qt5::Core
+            Qt5::Widgets
+            Qt5::Gui
+            Qt5::Xml
+            libzmq
+            opengl32
+            )
+endif ()
 
 add_custom_command(TARGET simulator POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/resources/simulator.pck" $<TARGET_FILE_DIR:simulator>

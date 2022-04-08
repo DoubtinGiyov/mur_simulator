@@ -5,6 +5,7 @@
 #include "AUVOverlay.h"
 #include "SharingOverlay.h"
 #include "PingersOverlay.h"
+#include "UIOverlay.h"
 
 #include <Urho3D/Graphics/Graphics.h>
 #include <Urho3D/Input/Input.h>
@@ -15,6 +16,11 @@
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/EngineDefs.h>
 #include <Urho3D/Physics/PhysicsWorld.h>
+
+#include <Urho3D/UI/UI.h>
+#include <Urho3D/UI/Text.h>
+#include <Urho3D/UI/Font.h>
+#include <Urho3D/Resource/ResourceCache.h>
 
 #include <QFileInfo>
 #include <QDir>
@@ -28,6 +34,7 @@ namespace QUrho {
             m_viewportsOverlay{new ViewportOverlay{GetContext(), this, this}},
             m_sharingOverlay{new SharingOverlay{GetContext(), this, this}},
             m_pingerOverlay{new PingerOverlay{GetContext(), this, this}},
+            m_uiOverlay{new UIOverlay{GetContext(), this, this}},
             m_urhoWidget{urhoWidget} {
         SubscribeToEvent(Urho3D::E_UPDATE, URHO3D_HANDLER(QUrhoScene, HandleUpdate));
 
@@ -106,12 +113,16 @@ namespace QUrho {
         m_sharingOverlay.reset(nullptr);
         m_viewportsOverlay.reset(nullptr);
         m_pingerOverlay.reset(nullptr);
-
+        
+        GetSubsystem<Urho3D::UI>()->Clear();
     }
 
     PingerOverlay *QUrhoScene::GetPingerOverlay() {
         return m_pingerOverlay.data();
     }
 
+    UIOverlay *QUrhoScene::GetUIOverlay() {
+        return m_uiOverlay.data();
+    }
 }
 
