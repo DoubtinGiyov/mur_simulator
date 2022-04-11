@@ -14,10 +14,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
 set(GSTREAMER_DIR_DLL "" CACHE PATH "Path to gstreamer libs")
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
-
-set(GSTREAMER_DIR_DLL "" CACHE PATH "Path to gstreamer libs")
-
 find_package(Qt5 REQUIRED COMPONENTS
         Core
         Widgets
