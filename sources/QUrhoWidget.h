@@ -4,6 +4,7 @@
 
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/Core/Context.h>
+#include <qevent.h>
 
 namespace QUrho {
     class Urho3DCoreWidget : public QWidget, public Urho3D::Object {
@@ -32,10 +33,18 @@ namespace QUrho {
 
         void FocusOut(QFocusEvent *event);
 
+        void MouseMoved(QMouseEvent *event);
+
+        void MouseButtonPress(QMouseEvent *event);
+
+        void MouseButtonRelease(QMouseEvent *event);
+
     protected:
         [[nodiscard]] QPaintEngine *paintEngine() const override;
 
         void paintEvent(QPaintEvent *event) override;
+        
+        void resizeEvent(QResizeEvent *event) override;
 
         void keyPressEvent(QKeyEvent *event) override;
 
@@ -47,7 +56,13 @@ namespace QUrho {
 
         void timerEvent(QTimerEvent *event) override;
 
-    private:
+        void mouseMoveEvent(QMouseEvent* event) override;
+
+        void mousePressEvent(QMouseEvent *event) override;
+
+        void mouseReleaseEvent(QMouseEvent *event) override;
+
+      private:
         void nextFrame();
 
         Urho3D::SharedPtr<Urho3D::Engine> m_engine;

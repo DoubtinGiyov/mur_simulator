@@ -7,6 +7,7 @@
 #include <Urho3D/Core/Context.h>
 #include <QtGui/QKeyEvent>
 #include <Urho3D/Input/Input.h>
+#include <qevent.h>
 
 namespace QUrho {
     class Urho3DCoreWidget;
@@ -27,7 +28,7 @@ namespace QUrho {
 
         virtual Urho3D::IntVector2 GetMousePosition() const;
 
-        virtual Urho3D::IntVector2 GetMouseMove() const;
+        virtual Urho3D::IntVector2 GetMouseMove();
 
         virtual int GetMouseWheelMove() const;
 
@@ -40,7 +41,11 @@ namespace QUrho {
 
         virtual void OnFocusOut(QFocusEvent *event);
 
-        virtual void HandleMouseButtons(Urho3D::StringHash eventType, Urho3D::VariantMap &eventData);
+        virtual void OnMouseMoved(QMouseEvent *event);
+
+        virtual void OnMouseButtonPressed(QMouseEvent* event);
+
+        virtual void OnMouseButtonReleased(QMouseEvent* event);
 
     private:
 
@@ -52,6 +57,9 @@ namespace QUrho {
         QSet<Qt::MouseButton> m_mouseButtonDown;
         QSet<Qt::MouseButton> m_mouseButtonPressed;
         int m_wheelDelta = 0;
+        int m_lastMousePosX = 0;
+        int m_lastMousePosY = 0;
+        Urho3D::IntVector2 m_mousePosDelta;
     };
 
 }

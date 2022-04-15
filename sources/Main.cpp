@@ -1,6 +1,8 @@
 #include "Application.h"
+#include <QGuiApplication>
 
 int main(int argc, char **argv) {
-  int result = QUrho::Application::execute(argc, argv);
-  return result;
+	qputenv("LC_ALL", "C");
+	int result = QUrho::Application::execute(argc, argv);
+	return result;
 }

@@ -1,5 +1,8 @@
 #include "QUrhoWidget.h"
 #include "QUrhoInput.h"
+#include "SDL/SDL_mouse.h"
+#include "SDL/SDL_video.h"
+#include "Urho3D/Graphics/GPUObject.h"
 
 #include <QEvent>
 #include <QDebug>
@@ -10,7 +13,11 @@
 #include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/Graphics/Renderer.h>
 #include <Urho3D/Resource/XMLFile.h>
+#include <Urho3D/Graphics/Graphics.h>
 
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_video.h>
+#include <qcursor.h>
 
 namespace QUrho {
 
@@ -21,6 +28,7 @@ namespace QUrho {
         setFocusPolicy(Qt::StrongFocus);
         setAttribute(Qt::WA_PaintOnScreen);
         startTimer(30);
+        setMouseTracking(true);
     }
 
     bool Urho3DCoreWidget::Initialize(const Urho3D::VariantMap &parameters) {
@@ -64,6 +72,17 @@ namespace QUrho {
         Q_UNUSED(event);
     }
 
+    void Urho3DCoreWidget::resizeEvent(QResizeEvent *event) 
+    {
+        if (!m_engine->IsInitialized() || m_engine->IsExiting()) return;
+
+        auto graphics = m_engine->GetSubsystem<Urho3D::Graphics>();
+        SDL_Window* graphicsWindow = graphics->GetWindow();
+        SDL_SetWindowSize(graphicsWindow, event->size().width(), event->size().height());
+
+        QWidget::resizeEvent(event);
+    }
+
     void Urho3DCoreWidget::keyPressEvent(QKeyEvent *event) {
         emit KeyPressed(event);
     }
@@ -88,6 +107,18 @@ namespace QUrho {
         if (m_engine->IsInitialized() && !m_engine->IsExiting()) {
             m_engine->RunFrame();
         }
+    }
+
+    void Urho3DCoreWidget::mouseMoveEvent(QMouseEvent* event) {
+        emit MouseMoved(event);
+    }
+
+    void Urho3DCoreWidget::mousePressEvent(QMouseEvent *event) {
+        emit MouseButtonPress(event);
+    }
+
+    void Urho3DCoreWidget::mouseReleaseEvent(QMouseEvent *event) {
+        emit MouseButtonRelease(event);
     }
 
     Urho3DCoreWidget::~Urho3DCoreWidget() {
