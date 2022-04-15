@@ -1,7 +1,5 @@
 #include "QUrhoWidget.h"
 #include "QUrhoInput.h"
-#include "SDL/SDL_mouse.h"
-#include "SDL/SDL_video.h"
 #include "Urho3D/Graphics/GPUObject.h"
 
 #include <QEvent>
@@ -15,8 +13,9 @@
 #include <Urho3D/Resource/XMLFile.h>
 #include <Urho3D/Graphics/Graphics.h>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_video.h>
+#include <Urho3D/ThirdParty/SDL/SDL.h>
+#include <Urho3D/ThirdParty/SDL/SDL_video.h>
+#include <Urho3D/ThirdParty/SDL/SDL_mouse.h>
 #include <qcursor.h>
 
 namespace QUrho {

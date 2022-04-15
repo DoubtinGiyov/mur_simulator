@@ -52,7 +52,6 @@ namespace QUrho {
 
         void InitializeMainWindow();
 
-//        QScopedPointer<QMdiArea> m_mdiWidget;
         QScopedPointer<QUrhoWidget> m_urhoWidget;
         QScopedPointer<QUrhoScene> m_scene;
         QScopedPointer<QAUVSettingsWidget> m_settingsWidget;

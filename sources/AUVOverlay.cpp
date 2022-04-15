@@ -18,6 +18,7 @@
 
 #include <Urho3D/Scene/Scene.h>
 #include <Urho3D/Graphics/Graphics.h>
+#include <Urho3D/Graphics/Material.h>
 
 namespace QUrho {
 

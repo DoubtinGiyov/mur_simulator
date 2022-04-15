@@ -24,7 +24,6 @@ namespace QUrho {
 
     }
 
-
     void PingerOverlay::Update(QUrhoInput *input, float timeStep) {
         m_updateDelta += timeStep;
         if (m_updateDelta >= m_updateTime) {

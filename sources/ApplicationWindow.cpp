@@ -35,8 +35,7 @@ namespace QUrho {
 
 ApplicationWindow::ApplicationWindow(QWidget *parent) :
         QMainWindow{parent},
-        m_mdiWidget{new QMdiArea{this}},
-        m_urhoWidget{new QUrhoWidget{m_mdiWidget.data()}},
+        m_urhoWidget{new QUrhoWidget{this}},
         m_settingsWidget{new QAUVSettingsWidget{this}},
         m_toolBar{new QToolBar{this}},
         m_yawLabel{new QLabel{"Yaw: 0.0 "}},
@@ -141,8 +140,7 @@ QMenu *ApplicationWindow::AddMenu(const QString &name) {
 }
 
 void ApplicationWindow::InitializeMainWindow() {
-    setCentralWidget(m_mdiWidget.data());
-    m_mdiWidget->setViewport(m_urhoWidget.data());
+    setCentralWidget(m_urhoWidget.data());
     setContentsMargins(0, 0, 0, 0);
     setMinimumSize(QSize{640, 480});
     CreateMenus();
