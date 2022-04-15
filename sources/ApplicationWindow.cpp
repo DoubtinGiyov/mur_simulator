@@ -33,229 +33,236 @@
 
 namespace QUrho {
 
-    ApplicationWindow::ApplicationWindow(QWidget *parent) :
-            QMainWindow{parent},
-            m_mdiWidget{new QMdiArea{this}},
-            m_urhoWidget{new QUrhoWidget{m_mdiWidget.data()}},
-            m_settingsWidget{new QAUVSettingsWidget{this}},
-            m_toolBar{new QToolBar{this}},
-            m_yawLabel{new QLabel{"Yaw: 0.0 "}},
-            m_pitchLabel{new QLabel{"Pitch: 0.0 "}},
-            m_rollLabel{new QLabel{"Roll: 0.0 "}},
-            m_depthLabel{new QLabel{"Depth: 0.0 "}} {
-        InitializeMainWindow();
+ApplicationWindow::ApplicationWindow(QWidget *parent) :
+        QMainWindow{parent},
+        m_mdiWidget{new QMdiArea{this}},
+        m_urhoWidget{new QUrhoWidget{m_mdiWidget.data()}},
+        m_settingsWidget{new QAUVSettingsWidget{this}},
+        m_toolBar{new QToolBar{this}},
+        m_yawLabel{new QLabel{"Yaw: 0.0 "}},
+        m_pitchLabel{new QLabel{"Pitch: 0.0 "}},
+        m_rollLabel{new QLabel{"Roll: 0.0 "}},
+        m_depthLabel{new QLabel{"Depth: 0.0 "}} {
+    InitializeMainWindow();
 #ifdef Q_OS_MACOS
-        resize(200, 200);
-        setAttribute(Qt::WA_UpdatesDisabled);
+    resize(200, 200);
+    setAttribute(Qt::WA_UpdatesDisabled);
 #else
-        resize(1024, 768);
+    resize(1024, 768);
 #endif
-        connect(m_settingsWidget.data(), &QAUVSettingsWidget::accepted, this, &ApplicationWindow::OnSettingAccepted);
-                
-    }
+    connect(m_settingsWidget.data(), &QAUVSettingsWidget::accepted, this, &ApplicationWindow::OnSettingAccepted);            
+}
 
-    void ApplicationWindow::InitializeEngine() {
-        Urho3D::VariantMap parameters;
-        parameters[Urho3D::EP_RESOURCE_PREFIX_PATHS] = "";
-        parameters[Urho3D::EP_RESOURCE_PATHS] = "";
-        parameters[Urho3D::EP_AUTOLOAD_PATHS] = "";
-        parameters[Urho3D::EP_MULTI_SAMPLE] = 16;
-        parameters[Urho3D::EP_WINDOW_RESIZABLE] = true;
-        parameters[Urho3D::EP_LOG_NAME] = "simulator.log";
-        parameters[Urho3D::EP_LOG_LEVEL] = 1;
-        parameters[Urho3D::EP_RESOURCE_PACKAGES] = "simulator.pck";
+void ApplicationWindow::InitializeEngine() {
+    Urho3D::VariantMap parameters;    
+    parameters[Urho3D::EP_RESOURCE_PREFIX_PATHS] = "";
+    parameters[Urho3D::EP_RESOURCE_PATHS] = "";
+    parameters[Urho3D::EP_AUTOLOAD_PATHS] = "";
+    parameters[Urho3D::EP_MULTI_SAMPLE] = 16;
+    parameters[Urho3D::EP_WINDOW_RESIZABLE] = true;
+    parameters[Urho3D::EP_LOG_NAME] = "simulator.log";
+    parameters[Urho3D::EP_LOG_LEVEL] = 1;
+    parameters[Urho3D::EP_RESOURCE_PACKAGES] = "simulator.pck";
 
-        m_urhoWidget->InitializeUrho3DEngine(parameters);
-        OpenScene(m_settingsWidget->GetLastScene());
-    }
+#ifdef Q_OS_LINUX
+    parameters[Urho3D::EP_FORCE_GL2] = 0;
+    parameters[Urho3D::EP_RESOURCE_PREFIX_PATHS] = ".;/usr/local/share/mur-simulator/;/usr/share/mur-simulator/";
+#endif
+    m_urhoWidget->InitializeUrho3DEngine(parameters);
+    OpenScene(m_settingsWidget->GetLastScene());
+}
 
-    void ApplicationWindow::CreateMenus() {
-        QMenu *menu = nullptr;
-        QAction *action = nullptr;
 
-        menu = AddMenu("Scene");
-        menuBar()->addMenu(menu);
+void ApplicationWindow::CreateMenus() {
+    QMenu *menu = nullptr;
+    QAction *action = nullptr;
 
-        action = AddAction("Open", Qt::CTRL + Qt::Key_O);
-        menu->addAction(action);
-        connect(action, &QAction::triggered, this, &ApplicationWindow::OnSceneOpen);
+    menu = AddMenu("Scene");
+    menuBar()->addMenu(menu);
 
-        menu = AddMenu("Settings");
-        menuBar()->addMenu(menu);
+    action = AddAction("Open", Qt::CTRL + Qt::Key_O);
+    menu->addAction(action);
+    connect(action, &QAction::triggered, this, &ApplicationWindow::OnSceneOpen);
 
-        action = AddAction("AUV Settings", Qt::CTRL + Qt::Key_S);
-        menu->addAction(action);
-        connect(action, &QAction::triggered, this, &ApplicationWindow::OnOpenAUVSettings);
+    menu = AddMenu("Settings");
+    menuBar()->addMenu(menu);
+
+    action = AddAction("AUV Settings", Qt::CTRL + Qt::Key_S);
+    menu->addAction(action);
+    connect(action, &QAction::triggered, this, &ApplicationWindow::OnOpenAUVSettings);
         
 #ifdef Q_OS_MACOS
-        action = AddAction("Remote mode", Qt::CTRL + Qt::Key_M);
-        action->setCheckable(true);
-        menu->addAction(action);
-        connect(action, &QAction::triggered, this, &ApplicationWindow::OnModeChanged);
+    action = AddAction("Remote mode", Qt::CTRL + Qt::Key_M);
+    action->setCheckable(true);
+    menu->addAction(action);
+    connect(action, &QAction::triggered, this, &ApplicationWindow::OnModeChanged);
 
-        action = AddAction("Robot reset", Qt::CTRL + Qt::Key_R);
-        connect(action, &QAction::triggered, this, &ApplicationWindow::OnAUVReset);
-        menu->addAction(action);
+    action = AddAction("Robot reset", Qt::CTRL + Qt::Key_R);
+    connect(action, &QAction::triggered, this, &ApplicationWindow::OnAUVReset);
+    menu->addAction(action);
 #endif
-    }
+}
 
-    void ApplicationWindow::CreateToolBar() {
-        m_toolBar->setMovable(false);
+void ApplicationWindow::CreateToolBar() {
+    m_toolBar->setMovable(false);
 
-        QAction *action = nullptr;
-        addToolBar(m_toolBar.data());
+    QAction *action = nullptr;
+    addToolBar(m_toolBar.data());
 
-        action = AddAction("Remote mode", Qt::CTRL + Qt::Key_M);
-        connect(action, &QAction::triggered, this, &ApplicationWindow::OnModeChanged);
-        action->setCheckable(true);
-        m_toolBar->addAction(action);
+    action = AddAction("Remote mode", Qt::CTRL + Qt::Key_M);
+    connect(action, &QAction::triggered, this, &ApplicationWindow::OnModeChanged);
+    action->setCheckable(true);
+    m_toolBar->addAction(action);
 
-        action = AddAction("Robot reset", Qt::CTRL + Qt::Key_R);
-        connect(action, &QAction::triggered, this, &ApplicationWindow::OnAUVReset);
-        m_toolBar->addAction(action);
+    action = AddAction("Robot reset", Qt::CTRL + Qt::Key_R);
+    connect(action, &QAction::triggered, this, &ApplicationWindow::OnAUVReset);
+    m_toolBar->addAction(action);
 
-        auto spacer = new QWidget;
-        spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        m_toolBar->addWidget(spacer);
+    auto spacer = new QWidget;
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_toolBar->addWidget(spacer);
 
-        m_toolBar->addWidget(m_yawLabel.data());
-        m_toolBar->addWidget(m_pitchLabel.data());
-        m_toolBar->addWidget(m_rollLabel.data());
-        m_toolBar->addWidget(m_depthLabel.data());
-    }
+    m_toolBar->addWidget(m_yawLabel.data());
+    m_toolBar->addWidget(m_pitchLabel.data());
+    m_toolBar->addWidget(m_rollLabel.data());
+    m_toolBar->addWidget(m_depthLabel.data());
+}
 
-    QAction *ApplicationWindow::AddAction(const QString &name, const QKeySequence &shortcut) {
-        auto action = new QAction{};
-        action->setText(name);
-        action->setShortcut(shortcut);
-        return action;
-    }
+QAction *ApplicationWindow::AddAction(const QString &name, const QKeySequence &shortcut) {
+    auto action = new QAction{};
+    action->setText(name);
+    action->setShortcut(shortcut);
+    return action;
+}
 
-    QMenu *ApplicationWindow::AddMenu(const QString &name) {
-        auto menu = new QMenu(name);
-        return menu;
-    }
+QMenu *ApplicationWindow::AddMenu(const QString &name) {
+    auto menu = new QMenu(name);
+    return menu;
+}
 
-    void ApplicationWindow::InitializeMainWindow() {
-        setCentralWidget(m_mdiWidget.data());
-        m_mdiWidget->setViewport(m_urhoWidget.data());
-        setContentsMargins(0, 0, 0, 0);
-        setMinimumSize(QSize{640, 480});
-        CreateMenus();
+void ApplicationWindow::InitializeMainWindow() {
+    setCentralWidget(m_mdiWidget.data());
+    m_mdiWidget->setViewport(m_urhoWidget.data());
+    setContentsMargins(0, 0, 0, 0);
+    setMinimumSize(QSize{640, 480});
+    CreateMenus();
 #ifndef Q_OS_MACOS
-        CreateToolBar();
+    CreateToolBar();
 #endif
+}
+
+void ApplicationWindow::OnSceneOpen() {
+    auto fileName = QFileDialog::getOpenFileName(nullptr, "Scene file", nullptr, "*.xml");
+    OpenScene(fileName);
+}
+
+ApplicationWindow::~ApplicationWindow() {
+}
+
+void ApplicationWindow::closeEvent(QCloseEvent *event) {
+    QApplication::closeAllWindows();
+    QApplication::quit();
+    cv::destroyAllWindows();
+    event->accept();
+    m_scene.reset(nullptr);
+
+    /* FIXME: Deadlock on Linux.
+ * m_urhoWidget->Exit();
+*/
+}
+
+void ApplicationWindow::OnOpenAUVSettings() {
+    m_settingsWidget->setModal(true);
+    m_settingsWidget->show();
+}
+
+void ApplicationWindow::OnAUVReset() {
+    if (m_scene) {
+        m_scene->GetAUVOverlay()->ResetAUV();
+        m_scene->GetNetworkOverlay()->Reset();
     }
+}
 
-    void ApplicationWindow::OnSceneOpen() {
-        auto fileName = QFileDialog::getOpenFileName(nullptr, "Scene file", nullptr, "*.xml");
-        OpenScene(fileName);
-    }
-
-    ApplicationWindow::~ApplicationWindow() {
-    }
-
-    void ApplicationWindow::closeEvent(QCloseEvent *event) {
-        QApplication::closeAllWindows();
-        cv::destroyAllWindows();
-        event->accept();
-        m_urhoWidget->Exit();
-        m_scene.reset(nullptr);
-
-        QApplication::quit();
-    }
-
-    void ApplicationWindow::OnOpenAUVSettings() {
-        m_settingsWidget->setModal(true);
-        m_settingsWidget->show();
-    }
-
-    void ApplicationWindow::OnAUVReset() {
+void ApplicationWindow::OnModeChanged() {
+    auto action = qobject_cast<QAction *>(sender());
+    if (action->isChecked()) {
+        action->setText("Manual mode");
         if (m_scene) {
-            m_scene->GetAUVOverlay()->ResetAUV();
-            m_scene->GetNetworkOverlay()->Reset();
+            m_scene->GetAUVOverlay()->SetRemote(false);
         }
-    }
-
-    void ApplicationWindow::OnModeChanged() {
-        auto action = qobject_cast<QAction *>(sender());
-        if (action->isChecked()) {
-            action->setText("Manual mode");
-            if (m_scene) {
-                m_scene->GetAUVOverlay()->SetRemote(false);
-            }
-            m_remote = false;
-        } else {
-            action->setText("Remote mode");
-            if (m_scene) {
-                m_scene->GetAUVOverlay()->SetRemote(true);
-            }
-            m_remote = true;
+        m_remote = false;
+    } else {
+        action->setText("Remote mode");
+        if (m_scene) {
+            m_scene->GetAUVOverlay()->SetRemote(true);
         }
+        m_remote = true;
     }
+}
 
-    void ApplicationWindow::OnTelemetryUpdated() {
-        auto AUVoverlay = m_scene->GetAUVOverlay();
-        auto rotations = AUVoverlay->GetAUVRotations();
-        auto depth = AUVoverlay->GetAUVDepth();
+void ApplicationWindow::OnTelemetryUpdated() {
+    auto AUVoverlay = m_scene->GetAUVOverlay();
+    auto rotations = AUVoverlay->GetAUVRotations();
+    auto depth = AUVoverlay->GetAUVDepth();
 
-        auto y = QString("Yaw: ") + QString::number(rotations.y_, 'f', 2) + " ";
-        auto p = QString("Pitch: ") + QString::number(rotations.x_, 'f', 2) + " ";
-        auto r = QString("Roll: ") + QString::number(rotations.z_, 'f', 2) + " ";
-        auto d = QString("Depth: ") + QString::number(depth, 'f', 2) + " ";
+    auto y = QString("Yaw: ") + QString::number(rotations.y_, 'f', 2) + " ";
+    auto p = QString("Pitch: ") + QString::number(rotations.x_, 'f', 2) + " ";
+    auto r = QString("Roll: ") + QString::number(rotations.z_, 'f', 2) + " ";
+    auto d = QString("Depth: ") + QString::number(depth, 'f', 2) + " ";
 
-        m_yawLabel->setText(y);
-        m_pitchLabel->setText(p);
-        m_rollLabel->setText(r);
-        m_depthLabel->setText(d);
-        
+    m_yawLabel->setText(y);
+    m_pitchLabel->setText(p);
+    m_rollLabel->setText(r);
+    m_depthLabel->setText(d);
+    
 #ifdef Q_OS_MACOS
-        m_scene->GetUIOverlay()->yawText->SetText(QtUrhoStringCast(y));
-        m_scene->GetUIOverlay()->pitchText->SetText(QtUrhoStringCast(p));
-        m_scene->GetUIOverlay()->rollText->SetText(QtUrhoStringCast(r));
-        m_scene->GetUIOverlay()->depthText->SetText(QtUrhoStringCast(d));
+    m_scene->GetUIOverlay()->yawText->SetText(QtUrhoStringCast(y));
+    m_scene->GetUIOverlay()->pitchText->SetText(QtUrhoStringCast(p));
+    m_scene->GetUIOverlay()->rollText->SetText(QtUrhoStringCast(r));
+    m_scene->GetUIOverlay()->depthText->SetText(QtUrhoStringCast(d));
 #endif
+}
+
+void ApplicationWindow::OnSettingAccepted() {
+    if (!m_scene) {
+        return;
+    }
+    auto auv = m_scene->GetAUVOverlay();
+    auto pingers = m_scene->GetPingerOverlay();
+    auv->SetLinearDamping(m_settingsWidget->GetLinearDamping());
+    auv->SetAngularDamping(m_settingsWidget->GetAngularDamping());
+    auv->ShowBottomCameraImage(m_settingsWidget->ShowBottomCameraImage());
+    auv->ShowFrontCameraImage(m_settingsWidget->ShowFrontCameraImage());
+    auv->SetGravity(m_settingsWidget->GetGravity());
+    auv->SetRemote(m_remote);
+    pingers->SetUpdateTime(m_settingsWidget->GetPingerUpdateTime());
+    cv::destroyAllWindows();
+}
+
+void ApplicationWindow::OpenScene(const QString &scene) {
+    if (scene.isEmpty() || scene.size() < 3) {
+        return;
     }
 
-    void ApplicationWindow::OnSettingAccepted() {
-        if (!m_scene) {
-            return;
-        }
-        auto auv = m_scene->GetAUVOverlay();
-        auto pingers = m_scene->GetPingerOverlay();
-        auv->SetLinearDamping(m_settingsWidget->GetLinearDamping());
-        auv->SetAngularDamping(m_settingsWidget->GetAngularDamping());
-        auv->ShowBottomCameraImage(m_settingsWidget->ShowBottomCameraImage());
-        auv->ShowFrontCameraImage(m_settingsWidget->ShowFrontCameraImage());
-        auv->SetGravity(m_settingsWidget->GetGravity());
-        auv->SetRemote(m_remote);
-        pingers->SetUpdateTime(m_settingsWidget->GetPingerUpdateTime());
-        cv::destroyAllWindows();
+    QFileInfo info(scene);
+    if (!info.exists() || !info.isFile()) {
+        return;
     }
-
-    void ApplicationWindow::OpenScene(const QString &scene) {
-        if (scene.isEmpty() || scene.size() < 3) {
-            return;
-        }
-
-        QFileInfo info(scene);
-        if (!info.exists() || !info.isFile()) {
-            return;
-        }
-        if (m_scene) {
-            m_scene.reset(nullptr);
-        }
-        m_scene.reset(new QUrhoScene{m_urhoWidget->GetUrho3DContext(), m_urhoWidget.data(), this});
-
-        if (m_scene->Load(scene)) {
-            connect(m_scene->GetAUVOverlay(), &AUVOverlay::TelemetryUpdated, this,
-                    &ApplicationWindow::OnTelemetryUpdated);
-            OnSettingAccepted();
-            m_settingsWidget->SetLastScene(scene);
-        } else {
-            m_scene.reset();
-        }
+    if (m_scene) {
+        m_scene.reset(nullptr);
     }
+    m_scene.reset(new QUrhoScene{m_urhoWidget->GetUrho3DContext(), m_urhoWidget.data(), this});
+
+    if (m_scene->Load(scene)) {
+        connect(m_scene->GetAUVOverlay(), &AUVOverlay::TelemetryUpdated, this,
+                &ApplicationWindow::OnTelemetryUpdated);
+        OnSettingAccepted();
+        m_settingsWidget->SetLastScene(scene);
+    } else {
+        m_scene.reset();
+    }
+}
+
 }
 
 

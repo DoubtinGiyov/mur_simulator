@@ -1,11 +1,13 @@
 #include "QUrhoInput.h"
 #include "QUrhoWidget.h"
 #include "QUrhoHelpers.h"
+#include "Urho3D/Math/Vector2.h"
 
 #include <QKeyEvent>
 #include <QMouseEvent>
 
 #include <Urho3D/Input/Input.h>
+#include <qevent.h>
 
 namespace QUrho {
 
@@ -25,11 +27,13 @@ namespace QUrho {
     }
 
     Urho3D::IntVector2 QUrhoInput::GetMousePosition() const {
-        return GetSubsystem<Urho3D::Input>()->GetMousePosition();
+        return Urho3D::IntVector2(m_lastMousePosX, m_lastMousePosY);
     }
 
-    Urho3D::IntVector2 QUrhoInput::GetMouseMove() const {
-        return GetSubsystem<Urho3D::Input>()->GetMouseMove();
+    Urho3D::IntVector2 QUrhoInput::GetMouseMove() {
+        auto returnValueMousePosDelta = m_mousePosDelta;
+        m_mousePosDelta = Urho3D::IntVector2(0, 0);
+        return returnValueMousePosDelta;
     }
 
     int QUrhoInput::GetMouseWheelMove() const {
@@ -45,9 +49,9 @@ namespace QUrho {
         connect(m_coreWidget, &Urho3DCoreWidget::KeyReleased, this, &QUrhoInput::OnKeyReleased);
         connect(m_coreWidget, &Urho3DCoreWidget::WheelMoved, this, &QUrhoInput::OnWheelMoved);
         connect(m_coreWidget, &Urho3DCoreWidget::FocusOut, this, &QUrhoInput::OnFocusOut);
-
-        SubscribeToEvent(Urho3D::E_MOUSEBUTTONDOWN, URHO3D_HANDLER(QUrhoInput, HandleMouseButtons));
-        SubscribeToEvent(Urho3D::E_MOUSEBUTTONUP, URHO3D_HANDLER(QUrhoInput, HandleMouseButtons));
+        connect(m_coreWidget, &Urho3DCoreWidget::MouseMoved, this, &QUrhoInput::OnMouseMoved);
+        connect(m_coreWidget, &Urho3DCoreWidget::MouseButtonPress, this, &QUrhoInput::OnMouseButtonPressed);
+        connect(m_coreWidget, &Urho3DCoreWidget::MouseButtonRelease, this, &QUrhoInput::OnMouseButtonReleased);
     }
 
     void QUrhoInput::OnKeyPressed(QKeyEvent *event) {
@@ -73,16 +77,23 @@ namespace QUrho {
         m_keysPressed.clear();
         m_mouseButtonPressed.clear();
         m_wheelDelta = 0;
+        m_mousePosDelta = Urho3D::IntVector2(0, 0);
         SetMouseMode(Urho3D::MM_ABSOLUTE);
     }
 
-    void QUrhoInput::HandleMouseButtons(Urho3D::StringHash eventType, Urho3D::VariantMap &eventData) {
-        const Qt::MouseButton button = UrhoQtMouseCast(eventData[Urho3D::MouseButtonDown::P_BUTTON].GetInt());
-        if (eventType == Urho3D::E_MOUSEBUTTONDOWN) {
-            m_mouseButtonPressed.insert(button);
-        } else {
-            m_mouseButtonPressed.remove(button);
-        }
+    void QUrhoInput::OnMouseMoved(QMouseEvent* event) {
+        auto pos = event->localPos();
+        m_mousePosDelta = Urho3D::IntVector2(pos.x() - m_lastMousePosX, pos.y() - m_lastMousePosY);
+        m_lastMousePosX = pos.x();
+        m_lastMousePosY = pos.y();
+    }
+
+    void QUrhoInput::OnMouseButtonPressed(QMouseEvent* event) {
+        m_mouseButtonPressed.insert(event->button());
+    }
+
+    void QUrhoInput::OnMouseButtonReleased(QMouseEvent* event) {
+        m_mouseButtonPressed.remove(event->button());
     }
 
     void QUrhoInput::SetMouseMode(Urho3D::MouseMode mode) {

@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
+
 
 if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_MACOSX_BUNDLE ON)
@@ -51,6 +53,15 @@ if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
             Qt5::Xml
             libzmq
             )
+elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+    target_link_libraries(simulator
+            ${OpenCV_LIBS}
+            Qt5::Core
+            Qt5::Widgets
+            Qt5::Gui
+            Qt5::Xml
+            ${ZMQ_LIBRARIES}
+            )
 else ()
     target_link_libraries(simulator
             ${OpenCV_LIBS}
@@ -62,6 +73,8 @@ else ()
             opengl32
             )
 endif ()
+
+
 
 add_custom_command(TARGET simulator POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/resources/simulator.pck" $<TARGET_FILE_DIR:simulator>
@@ -110,4 +123,12 @@ if (WIN32)
         )
 
     windeployqt(simulator)
+endif ()
+
+if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+    file(GLOB_RECURSE PROJECT_RESOURCES
+        ${PROJECT_SOURCE_DIR}/resources/*
+        )
+
+    install(FILES ${PROJECT_RESOURCES} DESTINATION share/mur-simulator)
 endif ()
