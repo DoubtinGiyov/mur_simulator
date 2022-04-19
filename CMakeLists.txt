@@ -1,13 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(simulator)
 
-set(CMAKE_CXX_STANDARD 17)
-
-if (MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
-endif()
-
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
@@ -79,8 +72,6 @@ else ()
             )
 endif ()
 
-
-
 add_custom_command(TARGET simulator POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/resources/simulator.pck" $<TARGET_FILE_DIR:simulator>
     )
@@ -137,3 +128,5 @@ if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
 
     install(FILES ${PROJECT_RESOURCES} DESTINATION share/mur-simulator)
 endif ()
+
+target_compile_features(simulator PRIVATE cxx_std_17)
