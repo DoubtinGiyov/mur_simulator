@@ -58,7 +58,7 @@ elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
             Qt5::Widgets
             Qt5::Gui
             Qt5::Xml
-            ${ZMQ_LIBRARIES}
+            libzmq
             )
 else ()
     target_link_libraries(simulator

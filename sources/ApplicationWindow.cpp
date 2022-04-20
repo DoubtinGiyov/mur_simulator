@@ -57,7 +57,7 @@ void ApplicationWindow::InitializeEngine() {
     parameters[Urho3D::EP_RESOURCE_PREFIX_PATHS] = "";
     parameters[Urho3D::EP_RESOURCE_PATHS] = "";
     parameters[Urho3D::EP_AUTOLOAD_PATHS] = "";
-    parameters[Urho3D::EP_MULTI_SAMPLE] = 16;
+    parameters[Urho3D::EP_MULTI_SAMPLE] = 4;
     parameters[Urho3D::EP_WINDOW_RESIZABLE] = true;
     parameters[Urho3D::EP_LOG_NAME] = "simulator.log";
     parameters[Urho3D::EP_LOG_LEVEL] = 1;
