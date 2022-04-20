@@ -57,7 +57,7 @@ void ApplicationWindow::InitializeEngine() {
     parameters[Urho3D::EP_RESOURCE_PREFIX_PATHS] = "";
     parameters[Urho3D::EP_RESOURCE_PATHS] = "";
     parameters[Urho3D::EP_AUTOLOAD_PATHS] = "";
-    parameters[Urho3D::EP_MULTI_SAMPLE] = 4;
+    parameters[Urho3D::EP_MULTI_SAMPLE] = 16;
     parameters[Urho3D::EP_WINDOW_RESIZABLE] = true;
     parameters[Urho3D::EP_LOG_NAME] = "simulator.log";
     parameters[Urho3D::EP_LOG_LEVEL] = 1;
@@ -66,6 +66,7 @@ void ApplicationWindow::InitializeEngine() {
 #ifdef Q_OS_LINUX
     parameters[Urho3D::EP_FORCE_GL2] = 0;
     parameters[Urho3D::EP_RESOURCE_PREFIX_PATHS] = ".;/usr/local/share/mur-simulator/;/usr/share/mur-simulator/";
+    parameters[Urho3D::EP_MULTI_SAMPLE] = 4;
 #endif
     m_urhoWidget->InitializeUrho3DEngine(parameters);
     OpenScene(m_settingsWidget->GetLastScene());
