@@ -180,7 +180,7 @@ namespace QUrho {
         CreateThrustersNodes();
         CreateCamerasNodes();
         SetupGravity(-0.05);
-        //CreateWater();
+        CreateWater();
         CreateRenderTextures();
     }
 
